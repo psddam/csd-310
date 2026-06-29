@@ -1,0 +1,42 @@
+import mysql.connector
+from mysql.connector import errorcode
+
+from dotenv import dotenv_values
+
+# Read secrets from .env
+secrets = dotenv_values(".env")
+
+config = {
+    "user": secrets["USER"],
+    "password": secrets["PASSWORD"],
+    "host": secrets["HOST"],
+    "database": secrets["DATABASE"],
+    "raise_on_warnings": True
+}
+
+try:
+
+    db = mysql.connector.connect(**config)
+
+    print("\nDatabase connection successful!")
+    print("--------------------------------")
+    print(f"User: {config['user']}")
+    print(f"Host: {config['host']}")
+    print(f"Database: {config['database']}")
+
+except mysql.connector.Error as err:
+
+    if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+        print("Invalid username or password.")
+
+    elif err.errno == errorcode.ER_BAD_DB_ERROR:
+        print("Database does not exist.")
+
+    else:
+        print(err)
+
+finally:
+
+    if 'db' in locals() and db.is_connected():
+        db.close()
+        print("\nConnection closed.")
